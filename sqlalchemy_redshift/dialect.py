@@ -1482,6 +1482,8 @@ class RedshiftDialect_redshift_connector(RedshiftDialectMixin, PGDialect):
     update_returning = False
     delete_returning = False
     insert_returning = False
+    update_returning_multifrom = False
+    delete_returning_multifrom = False
 
     def __init__(self, client_encoding=None, **kwargs):
         super(RedshiftDialect_redshift_connector, self).__init__(
