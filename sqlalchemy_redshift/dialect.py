@@ -846,6 +846,10 @@ class RedshiftDialectMixin(DefaultDialect):
     update_returning_multifrom = False
     delete_returning_multifrom = False
 
+    supports_native_enum = False
+    supports_smallserial = False
+    supports_multischema_operations = False
+
     statement_compiler = RedshiftCompiler
     ddl_compiler = RedshiftDDLCompiler
     preparer = RedshiftIdentifierPreparer
@@ -1019,6 +1023,14 @@ class RedshiftDialectMixin(DefaultDialect):
             "constrained_columns": constrained_columns,
             "name": pk_constraint.conname,
         }
+
+    # @reflection.cache
+    def get_multi_pk_constraint(self, connection, schema=None, **kw):
+        insp = reflection.Inspector.from_engine(connection)
+        tables = insp.get_table_names(schema)
+        return (
+            ((schema, table), insp.get_pk_constraint(table, schema)) for table in tables
+        )
 
     @reflection.cache
     def get_foreign_keys(self, connection, table_name, schema=None, **kw):
@@ -1378,6 +1390,10 @@ class RedshiftDialectMixin(DefaultDialect):
             key = RelationKey(con.table_name, con.schema, connection)
             all_constraints[key].append(con)
         return all_constraints
+
+    @reflection.cache
+    def _load_domains(self, connection, schema=None, **kw):
+        return []
 
     def _set_backslash_escapes(self, connection):
         self._backslash_escapes = False
